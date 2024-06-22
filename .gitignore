@@ -31,3 +31,10 @@ replay_pid*
 /out/
 .DS_Store
 src/.DS_Store
+
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
