@@ -21,9 +21,18 @@ public class RentalAgreement {
     private final BigDecimal finalCharge;
 
     // Private constructor to be used by the builder
-    private RentalAgreement(String toolCode, String toolType, String toolBrand, int rentalDays, Date checkoutDate,
-                            Date dueDate, BigDecimal dailyCharge, int chargeDays, BigDecimal preDiscountCharge,
-                            int discountPercent, BigDecimal discountAmount, BigDecimal finalCharge) {
+    private RentalAgreement(String toolCode,
+                            String toolType,
+                            String toolBrand,
+                            int rentalDays,
+                            Date checkoutDate,
+                            Date dueDate,
+                            BigDecimal dailyCharge,
+                            int chargeDays,
+                            BigDecimal preDiscountCharge,
+                            int discountPercent,
+                            BigDecimal discountAmount,
+                            BigDecimal finalCharge) {
         this.toolCode = toolCode;
         this.toolType = toolType;
         this.toolBrand = toolBrand;
