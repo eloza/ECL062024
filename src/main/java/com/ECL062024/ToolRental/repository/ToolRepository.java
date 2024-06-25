@@ -1,6 +1,8 @@
 package com.ECL062024.ToolRental.repository;
 
 import com.ECL062024.ToolRental.model.Tool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
@@ -8,7 +10,7 @@ import java.util.Map;
 
 @Repository
 public class ToolRepository {
-
+    private static final Logger logger = LoggerFactory.getLogger(ToolRepository.class);
     private static final Map<String, Tool> tools = new HashMap<>();
 
     static {
@@ -47,6 +49,8 @@ public class ToolRepository {
                 true,
                 false,
                 false));
+
+        logger.info("ToolRepository initialized with sample tools");
     }
 
     private ToolRepository() {
@@ -54,6 +58,7 @@ public class ToolRepository {
     }
 
     public static Tool findByCode(String toolCode) {
+        logger.debug("Searching for tool with code: {}", toolCode);
         return tools.get(toolCode);
     }
 
