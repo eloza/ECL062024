@@ -1,5 +1,8 @@
 package com.ECL062024.ToolRental.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -7,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class RentalAgreement {
+    private static final Logger logger = LoggerFactory.getLogger(RentalAgreement.class);
     private final String toolCode;
     private final String toolType;
     private final String toolBrand;
@@ -45,6 +49,8 @@ public class RentalAgreement {
         this.discountPercent = discountPercent;
         this.discountAmount = discountAmount;
         this.finalCharge = finalCharge;
+
+        logger.info("RentalAgreement created: {}", this);
     }
 
     // Getters for all fields
@@ -101,6 +107,7 @@ public class RentalAgreement {
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yy");
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
         DecimalFormat percentFormat = new DecimalFormat("#");
+        logger.debug("Printing rental agreement for tool code: {}", toolCode);
 
         System.out.println("Tool code: " + toolCode);
         System.out.println("Tool type: " + toolType);
@@ -183,6 +190,7 @@ public class RentalAgreement {
         }
 
         public RentalAgreement build() {
+            logger.debug("Building RentalAgreement for tool code: {}", toolCode);
             return new RentalAgreement(
                     toolCode,
                     toolType,
