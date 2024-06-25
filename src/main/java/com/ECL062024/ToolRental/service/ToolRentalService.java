@@ -157,7 +157,6 @@ public class ToolRentalService {
         if (rentalDays < 1) {
             throw new IllegalArgumentException("Rental days must be 1 or greater.");
         }
-
     }
 
     private void validateDiscountPercent(int discountPercent) {

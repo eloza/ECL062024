@@ -50,4 +50,5 @@ public class Tool {
     public boolean isHolidayCharge() {
         return holidayCharge;
     }
+
 }

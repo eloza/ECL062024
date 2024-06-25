@@ -23,7 +23,7 @@ class ToolRentalApplicationTests {
     void testCheckoutTool() throws ParseException {
         // Test parameters for Test 1
         String toolCode = "JAKR";
-        String checkoutDateStr = "09/03/15"; // Using string format as expected by the service
+        String checkoutDateStr = "09/03/15";
         int rentalDays = 5;
         int discountPercent = 0;
 
@@ -34,7 +34,6 @@ class ToolRentalApplicationTests {
                 discountPercent,
                 checkoutDateStr);
 
-        // Assertions
         assertNotNull(rentalAgreement);
         assertEquals("JAKR", rentalAgreement.getToolCode());
         assertEquals("Jackhammer", rentalAgreement.getToolType());
@@ -45,6 +44,8 @@ class ToolRentalApplicationTests {
         Date checkoutDate = dateFormat.parse(checkoutDateStr);
 
         assertEquals(checkoutDate, rentalAgreement.getCheckoutDate());
-        assertEquals(new Date(checkoutDate.getTime() + (1000 * 60 * 60 * 24 * rentalDays)), rentalAgreement.getDueDate());
+        assertEquals(new Date(checkoutDate.getTime() + (1000 * 60 * 60 * 24 * rentalDays)),
+                rentalAgreement.getDueDate());
     }
+
 }
