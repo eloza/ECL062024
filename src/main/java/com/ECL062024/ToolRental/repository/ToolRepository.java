@@ -8,6 +8,10 @@ import org.springframework.stereotype.Repository;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Repository for managing tools.
+ * Provides methods to interact with tool data storage.
+ */
 @Repository
 public class ToolRepository {
     private static final Logger logger = LoggerFactory.getLogger(ToolRepository.class);
@@ -53,10 +57,17 @@ public class ToolRepository {
         logger.info("ToolRepository initialized with sample tools");
     }
 
-    private ToolRepository() {
-        // Private constructor to prevent instantiation
-    }
+    /**
+     * Private constructor to prevent instantiation.
+     */
+    private ToolRepository() {}
 
+    /**
+     * Finds a tool by its code.
+     *
+     * @param toolCode The code of the tool to find.
+     * @return The tool with the specified code, or null if no such tool exists.
+     */
     public static Tool findByCode(String toolCode) {
         logger.debug("Searching for tool with code: {}", toolCode);
         return tools.get(toolCode);
