@@ -15,16 +15,36 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+
+/**
+ * Service for managing tool rentals.
+ * Provides methods to check out tools and calculate rental charges.
+ */
 @Service
 public class ToolRentalService {
     private static final Logger logger = LoggerFactory.getLogger(ToolRentalService.class);
     private final ToolRepository toolRepository;
 
+    /**
+     * Constructor to initialize ToolRentalService with the given ToolRepository.
+     *
+     * @param toolRepository the tool repository
+     */
     @Autowired
     public ToolRentalService(ToolRepository toolRepository) {
         this.toolRepository = toolRepository;
     }
 
+    /**
+     * Checks out a tool and creates a rental agreement.
+     *
+     * @param toolCode        the tool code
+     * @param rentalDays      the number of rental days
+     * @param discountPercent the discount percent
+     * @param checkoutDateStr the checkout date as a string
+     * @return the rental agreement
+     * @throws ParseException if the checkout date string is invalid
+     */
     public RentalAgreement checkOutTool(String toolCode, int rentalDays, int discountPercent, String checkoutDateStr)
             throws ParseException {
         logger.info("Checking out tool with code: {}, rental days: {}, discount percent: {}, checkout date: {}",
@@ -83,6 +103,13 @@ public class ToolRentalService {
     }
 
 
+    /**
+     * Calculates the number of chargeable days for the rental period.
+     *
+     * @param checkoutDate the checkout date
+     * @param rentalDays   the number of rental days
+     * @return the number of chargeable days
+     */
     private int calculateChargeableDays(Date checkoutDate, int rentalDays) {
         int chargeableDays = 0;
         Calendar calendar = Calendar.getInstance();
@@ -104,6 +131,12 @@ public class ToolRentalService {
         return chargeableDays;
     }
 
+    /**
+     * Checks if a given date is a chargeable day.
+     *
+     * @param date the date to check
+     * @return true if the date is chargeable, false otherwise
+     */
     private boolean isChargeableDay(Date date) {
         // Check if it is a holiday first
         if (isHoliday(date)) {
@@ -114,6 +147,12 @@ public class ToolRentalService {
         return isWeekday(date);
     }
 
+    /**
+     * Checks if a given date is a weekday.
+     *
+     * @param date the date to check
+     * @return true if the date is a weekday, false otherwise
+     */
     private boolean isWeekday(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -121,6 +160,12 @@ public class ToolRentalService {
         return dayOfWeek != Calendar.SATURDAY && dayOfWeek != Calendar.SUNDAY;
     }
 
+    /**
+     * Checks if a given date is a holiday.
+     *
+     * @param date the date to check
+     * @return true if the date is a holiday, false otherwise
+     */
     private boolean isHoliday(Date date) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
@@ -133,44 +178,73 @@ public class ToolRentalService {
         if (month == Calendar.JULY && dayOfMonth == 4) {
             // If July 4th falls on a Saturday, observe on Friday July 3rd
             if (dayOfWeek == Calendar.SATURDAY) {
-                // July 3rd is a holiday
                 return true;
             }
             // If July 4th falls on a Sunday, observe on Monday July 5th
             if (dayOfWeek == Calendar.SUNDAY) {
-                // July 5th is a holiday
                 return true;
             }
         }
 
         // Check for Labor Day, First Monday in September
         if (month == Calendar.SEPTEMBER && dayOfWeek == Calendar.MONDAY && dayOfMonth <= 7) {
-            // First Monday in September is a holiday (Labor Day)
+            // First Monday in September is a holiday - Labor Day
             return true;
         }
 
         return false;
     }
 
+    /**
+     * Calculates the pre-discount charge.
+     *
+     * @param dailyCharge    the daily charge
+     * @param chargeableDays the number of chargeable days
+     * @return the pre-discount charge
+     */
     private BigDecimal calculatePreDiscountCharge(BigDecimal dailyCharge, int chargeableDays) {
         return dailyCharge.multiply(BigDecimal.valueOf(chargeableDays)).setScale(2, RoundingMode.HALF_UP);
     }
 
+    /**
+     * Calculates the discount amount.
+     *
+     * @param preDiscountCharge the pre-discount charge
+     * @param discountPercent   the discount percent
+     * @return the discount amount
+     */
     private BigDecimal calculateDiscountAmount(BigDecimal preDiscountCharge, int discountPercent) {
         return preDiscountCharge.multiply(BigDecimal.valueOf(discountPercent)).divide(BigDecimal.valueOf(100),
                         RoundingMode.HALF_UP).setScale(2, RoundingMode.HALF_UP);
     }
 
+    /**
+     * Calculates the final charge after discount.
+     *
+     * @param preDiscountCharge the pre-discount charge
+     * @param discountAmount    the discount amount
+     * @return the final charge
+     */
     private BigDecimal calculateFinalCharge(BigDecimal preDiscountCharge, BigDecimal discountAmount) {
         return preDiscountCharge.subtract(discountAmount).setScale(2, RoundingMode.HALF_UP);
     }
 
+    /**
+     * Validates the number of rental days.
+     *
+     * @param rentalDays the number of rental days
+     */
     private void validateRentalDays(int rentalDays) {
         if (rentalDays < 1) {
             throw new IllegalArgumentException("Rental days must be 1 or greater.");
         }
     }
 
+    /**
+     * Validates the discount percent.
+     *
+     * @param discountPercent the discount percent
+     */
     private void validateDiscountPercent(int discountPercent) {
         if (discountPercent < 0 || discountPercent > 100) {
             logger.error("Invalid discount percent: {}", discountPercent);
@@ -178,11 +252,25 @@ public class ToolRentalService {
         }
     }
 
+    /**
+     * Parses a date from a string.
+     *
+     * @param dateStr the date string
+     * @return the parsed date
+     * @throws ParseException if the date string is invalid
+     */
     private Date parseDate(String dateStr) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yy");
         return dateFormat.parse(dateStr);
     }
 
+    /**
+     * Calculates the due date.
+     *
+     * @param checkoutDate the checkout date
+     * @param rentalDays   the number of rental days
+     * @return the due date
+     */
     private Date calculateDueDate(Date checkoutDate, int rentalDays) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(checkoutDate);
