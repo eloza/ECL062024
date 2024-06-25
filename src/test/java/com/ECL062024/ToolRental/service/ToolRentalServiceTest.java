@@ -18,13 +18,11 @@ import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
 
 class ToolRentalServiceTest {
-
-    private ToolRepository toolRepository;
     @InjectMocks
     private ToolRentalService toolRentalService;
+    private ToolRepository toolRepository;
 
     @BeforeEach
     void setUp() {
@@ -32,7 +30,9 @@ class ToolRentalServiceTest {
         toolRentalService = new ToolRentalService(toolRepository);
     }
 
-    // Scenario 1: Invalid discount percent (greater than 100)
+    /**
+     * Tests the scenario where the discount percent is invalid (greater than 100).
+     */
     @Test
     void testCheckoutTool_invalidDiscountPercent() {
         String toolCode = "JAKR";
@@ -50,7 +50,11 @@ class ToolRentalServiceTest {
         assertEquals("Discount percent must be between 0 and 100 inclusive.", thrown.getMessage());
     }
 
-    // Scenario 2: Checkout of Ladder tool (LADW) with 3 rental days, 10% discount
+    /**
+     * Tests the checkout of a Ladder tool (LADW) with 3 rental days and 10% discount.
+     *
+     * @throws ParseException if the checkout date string cannot be parsed.
+     */
     @Test
     void testCheckoutTool_LADW() throws ParseException {
         String toolCode = "LADW";
@@ -81,22 +85,22 @@ class ToolRentalServiceTest {
             LocalDate expectedCheckoutDate = LocalDate.parse(checkoutDateStr, formatter);
             LocalDate actualCheckoutDate =
                     rentalAgreement.getCheckoutDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-
             assertEquals(expectedCheckoutDate, actualCheckoutDate);
             assertEquals(expectedCheckoutDate.plusDays(rentalDays), rentalAgreement.getDueDate().toInstant().
                     atZone(ZoneId.systemDefault()).toLocalDate());
             assertEquals(BigDecimal.valueOf(1.99), rentalAgreement.getDailyCharge());
-            // Should be 2 chargeable days
             assertEquals(2, rentalAgreement.getChargeDays());
-            // 1.99 * 2 chargeable days
             assertEquals(BigDecimal.valueOf(3.98), rentalAgreement.getPreDiscountCharge());
             assertEquals(discountPercent, rentalAgreement.getDiscountPercent());
-            // 3.98 - 0.40 = 3.58
             assertEquals(BigDecimal.valueOf(3.58), rentalAgreement.getFinalCharge());
         }
     }
 
-    // Scenario 3: Checkout of Chainsaw tool (CHNS) with 5 rental days, 25% discount
+    /**
+     * Tests the checkout of a Chainsaw tool (CHNS) with 5 rental days and 25% discount.
+     *
+     * @throws ParseException if the checkout date string cannot be parsed.
+     */
     @Test
     void testCheckoutTool_CHNS() throws ParseException {
         String toolCode = "CHNS";
@@ -114,38 +118,35 @@ class ToolRentalServiceTest {
 
         try (MockedStatic<ToolRepository> mockedStatic = mockStatic(ToolRepository.class)) {
             mockedStatic.when(() -> ToolRepository.findByCode(toolCode)).thenReturn(mockTool);
-
             RentalAgreement rentalAgreement =
                     toolRentalService.checkOutTool(toolCode, rentalDays, discountPercent, checkoutDateStr);
-
             assertNotNull(rentalAgreement);
             assertEquals(toolCode, rentalAgreement.getToolCode());
             assertEquals("Chainsaw", rentalAgreement.getToolType());
             assertEquals("Stihl", rentalAgreement.getToolBrand());
             assertEquals(rentalDays, rentalAgreement.getRentalDays());
-
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yy");
             LocalDate checkoutDate = LocalDate.parse(checkoutDateStr, formatter);
-
             assertEquals(checkoutDate, rentalAgreement.getCheckoutDate().toInstant().atZone(ZoneId.systemDefault()).
                     toLocalDate());
             assertEquals(checkoutDate.plusDays(rentalDays), rentalAgreement.getDueDate().toInstant().
                     atZone(ZoneId.systemDefault()).toLocalDate());
             assertEquals(new BigDecimal("1.49"), rentalAgreement.getDailyCharge());
-            // 3 chargeable days: 7/2, 7/3, 7/6 (7/4 is holiday, 7/5 is weekend)
             assertEquals(3, rentalAgreement.getChargeDays());
             assertEquals(new BigDecimal("4.47"), rentalAgreement.getPreDiscountCharge());
             assertEquals(discountPercent, rentalAgreement.getDiscountPercent());
             BigDecimal expectedDiscountAmount = new BigDecimal("1.12");
-            // 25% of 4.47
             assertEquals(expectedDiscountAmount, rentalAgreement.getDiscountAmount());
             BigDecimal expectedFinalCharge = new BigDecimal("3.35");
-            // 4.47 - 1.12
             assertEquals(expectedFinalCharge, rentalAgreement.getFinalCharge());
         }
     }
 
-    // Scenario 4: Checkout of Jackhammer tool (JAKD) with 6 rental days, no discount
+    /**
+     * Tests the checkout of a Jackhammer tool (JACKD) with 6 rental days and no discount.
+     *
+     * @throws ParseException if the checkout date string cannot be parsed.
+     */
     @Test
     void testCheckoutTool_JACKD() throws ParseException {
         String toolCode = "JACKD";
@@ -194,7 +195,11 @@ class ToolRentalServiceTest {
         }
     }
 
-    // Scenario 5: Checkout of Rake tool (JACKR) with 9 rental days, 0% discount
+    /**
+     * Tests the checkout of a jackhammer tool (JACKR) with 9 rental days and 0% discount.
+     *
+     * @throws ParseException if the checkout date string cannot be parsed.
+     */
     @Test
     void testCheckoutTool_JAKR_9days() throws ParseException {
         String toolCode = "JACKR";
@@ -203,46 +208,47 @@ class ToolRentalServiceTest {
         int discountPercent = 0;
 
         // Mocking the tool
-        Tool mockTool = new Tool(toolCode, "Rake", "Generic", 1.99, true, false, false);
+        Tool mockTool = new Tool(toolCode,
+                "jackhammer",
+                "Ridgid",
+                1.99,
+                true,
+                false,
+                false);
 
         try (MockedStatic<ToolRepository> mockedStatic = mockStatic(ToolRepository.class)) {
             mockedStatic.when(() -> ToolRepository.findByCode(toolCode)).thenReturn(mockTool);
 
-            // Perform the checkout
-            RentalAgreement rentalAgreement = toolRentalService.checkOutTool(toolCode, rentalDays, discountPercent, checkoutDateStr);
+            RentalAgreement rentalAgreement = toolRentalService.checkOutTool(toolCode, rentalDays, discountPercent,
+                    checkoutDateStr);
 
-            // Perform assertions
             assertNotNull(rentalAgreement);
             assertEquals(toolCode, rentalAgreement.getToolCode());
-            assertEquals("Rake", rentalAgreement.getToolType());
-            assertEquals("Generic", rentalAgreement.getToolBrand());
+            assertEquals("jackhammer", rentalAgreement.getToolType());
+            assertEquals("Ridgid", rentalAgreement.getToolBrand());
             assertEquals(rentalDays, rentalAgreement.getRentalDays());
-
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yy");
             LocalDate checkoutDate = LocalDate.parse(checkoutDateStr, formatter);
-
-            assertEquals(checkoutDate, rentalAgreement.getCheckoutDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-            assertEquals(checkoutDate.plusDays(rentalDays), rentalAgreement.getDueDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+            assertEquals(checkoutDate, rentalAgreement.getCheckoutDate().toInstant().atZone(ZoneId.systemDefault()).
+                    toLocalDate());
+            assertEquals(checkoutDate.plusDays(rentalDays), rentalAgreement.getDueDate().toInstant().atZone(ZoneId.
+                    systemDefault()).toLocalDate());
             assertEquals(new BigDecimal("1.99"), rentalAgreement.getDailyCharge());
-
-            // Calculate expected chargeable days
-            // In this scenario, July 2, 2015 is a Thursday
-            // 7 chargeable days: 7/2, 7/3, 7/6, 7/7, 7/8, 7/9, 7/10 (7/4 is holiday, 7/5 is weekend)
             assertEquals(7, rentalAgreement.getChargeDays());
-
-            // Pre-discount charge should be 1.99 * 7 = 13.93
             assertEquals(new BigDecimal("13.93"), rentalAgreement.getPreDiscountCharge());
-
             assertEquals(discountPercent, rentalAgreement.getDiscountPercent());
-            assertEquals(BigDecimal.ZERO.setScale(2, RoundingMode.UNNECESSARY), rentalAgreement.getDiscountAmount().setScale(2, RoundingMode.UNNECESSARY));
-
-            // Final charge should be pre-discount charge
+            assertEquals(BigDecimal.ZERO.setScale(2, RoundingMode.UNNECESSARY), rentalAgreement.
+                    getDiscountAmount().setScale(2, RoundingMode.UNNECESSARY));
             BigDecimal expectedFinalCharge = new BigDecimal("13.93");
             assertEquals(expectedFinalCharge, rentalAgreement.getFinalCharge());
         }
     }
 
-    // Scenario 6: Checkout of Jackhammer tool JAKR with 4 rental days, 50% discount
+    /**
+     * Tests the checkout of a Jackhammer tool (JAKR) with 4 rental days and 50% discount.
+     *
+     * @throws ParseException if the checkout date string cannot be parsed.
+     */
     @Test
     void testCheckoutTool_JAKR_4days() throws ParseException {
         String toolCode = "JACKR";
@@ -262,11 +268,9 @@ class ToolRentalServiceTest {
         try (MockedStatic<ToolRepository> mockedStatic = mockStatic(ToolRepository.class)) {
             mockedStatic.when(() -> ToolRepository.findByCode(toolCode)).thenReturn(mockTool);
 
-            // Perform the checkout
             RentalAgreement rentalAgreement =
                     toolRentalService.checkOutTool(toolCode, rentalDays, discountPercent, checkoutDateStr);
 
-            // Perform assertions
             assertNotNull(rentalAgreement);
             assertEquals(toolCode, rentalAgreement.getToolCode());
             assertEquals("Jackhammer", rentalAgreement.getToolType());
