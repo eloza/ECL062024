@@ -19,15 +19,19 @@ class ToolRentalApplicationTests {
     @Autowired
     private ToolRentalService toolRentalService;
 
+    /**
+     * Integration test for the ToolRentalService to ensure the application context loads
+     * and the checkOutTool method works as expected.
+     *
+     * @throws ParseException if the checkout date string cannot be parsed.
+     */
     @Test
     void testCheckoutTool() throws ParseException {
-        // Test parameters for Test 1
         String toolCode = "JAKR";
         String checkoutDateStr = "09/03/15";
         int rentalDays = 5;
         int discountPercent = 0;
 
-        // Execute checkout
         RentalAgreement rentalAgreement = toolRentalService.checkOutTool(
                 toolCode,
                 rentalDays,
@@ -39,13 +43,11 @@ class ToolRentalApplicationTests {
         assertEquals("Jackhammer", rentalAgreement.getToolType());
         assertEquals("Ridgid", rentalAgreement.getToolBrand());
 
-        // Format date for comparison
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yy");
         Date checkoutDate = dateFormat.parse(checkoutDateStr);
-
         assertEquals(checkoutDate, rentalAgreement.getCheckoutDate());
-        assertEquals(new Date(checkoutDate.getTime() + (1000 * 60 * 60 * 24 * rentalDays)),
-                rentalAgreement.getDueDate());
-    }
 
+        Date expectedDueDate = new Date(checkoutDate.getTime() + (1000 * 60 * 60 * 24 * rentalDays));
+        assertEquals(expectedDueDate, rentalAgreement.getDueDate());
+    }
 }
